@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="autoware_nova_carter_interface" exec="autoware_nova_carter_interface_node" name="nova_carter_interface" output="screen">
+    <param from="$(find-pkg-share autoware_nova_carter_interface)/config/nova_carter_interface.param.yaml" />
+  </node>
+</launch>

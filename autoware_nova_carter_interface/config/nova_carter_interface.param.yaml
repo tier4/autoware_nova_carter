@@ -1,0 +1,11 @@
+/**:
+  ros__parameters:
+    # Frame ID
+    base_frame_id: "base_link"
+
+    # Velocity limits
+    maximum_linear_velocity: 1.0  # m/s
+    maximum_angular_velocity: 0.5  # rad/s
+
+    # Vehicle parameters
+    wheel_base: 0.65  # meters, example value
