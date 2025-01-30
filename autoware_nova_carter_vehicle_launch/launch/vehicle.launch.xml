@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <arg name="initial_engage_state" default="false" description="/vehicle/engage state after starting Autoware"/>
+  <arg name="launch_vehicle_interface" default="true"/>
+
+  <!-- vehicle description -->
+  <include file="$(var nova_carter_description)/launch/nova_carter_description.launch.py"/>
+
+  <!-- vehicle interface -->
+  <group if="$(var launch_vehicle_interface)">
+    <include file="$(var autoware_nova_carter_interface)/launch/nova_carter_interface.launch.xml">
+      <arg name="initial_engage_state" value="$(var initial_engage_state)"/>
+    </include>
+
+    <include file="$(var nova_carter_bringup)/launch/segway_include.launch.py">
+      <arg name="enable_wheel_odometry" value="true"/>
+    </include>
+  </group>
+</launch>
