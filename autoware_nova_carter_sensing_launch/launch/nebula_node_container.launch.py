@@ -68,18 +68,18 @@ def launch_setup(context, *args, **kwargs):
 
     nodes = []
 
-    nodes.append(
-        ComposableNode(
-            package="autoware_glog_component",
-            plugin="autoware::glog_component::GlogComponent",
-            name="glog_component",
-        )
-    )
+    # nodes.append(
+    #     ComposableNode(
+    #         package="autoware_glog_component",
+    #         plugin="autoware::glog_component::GlogComponent",
+    #         name="glog_component",
+    #     )
+    # )
 
     nodes.append(
         ComposableNode(
             package="nebula_ros",
-            plugin=sensor_make + "RosWrapper",
+            plugin="HesaiRosWrapper",
             name=sensor_make.lower() + "_ros_wrapper_node",
             parameters=[
                 {
@@ -172,8 +172,6 @@ def generate_launch_description():
         launch_arguments.append(
             DeclareLaunchArgument(name, default_value=default_value, description=description)
         )
-
-    common_sensor_share_dir = get_package_share_directory("common_sensor_launch")
 
     add_launch_arg("sensor_model", description="sensor model name")
     add_launch_arg("config_file", "", description="sensor configuration file")

@@ -2,15 +2,15 @@
 <launch>
 
   <!-- launch sensors from nova_carter_bringup except for hesai -->
-  <arg name="mode" default="real_world" doc="Operating mode" />
-  <arg name="rosbag" default="None" doc="Rosbag file" />
-  <arg name="enabled_stereo_cameras" default="front_stereo_camera,left_stereo_camera,right_stereo_camera" doc="Enabled stereo cameras" />
-  <arg name="enabled_fisheye_cameras" default="front_fisheye_camera" doc="Enabled fisheye cameras" />
-  <arg name="enabled_2d_lidars" default="front_2d_lidar,back_2d_lidar" doc="Enabled 2D lidars" />
-  <arg name="enable_3d_lidar" default="false" doc="Enable 3D lidar" />
-  <arg name="type_negotiation_duration_s" default="5" doc="Type negotiation duration in seconds" />
+  <arg name="mode" default="real_world" description="Operating mode" />
+  <arg name="rosbag" default="None" description="Rosbag file" />
+  <arg name="enabled_stereo_cameras" default="front_stereo_camera,left_stereo_camera,right_stereo_camera" description="Enabled stereo cameras" />
+  <arg name="enabled_fisheye_cameras" default="front_fisheye_camera" description="Enabled fisheye cameras" />
+  <arg name="enabled_2d_lidars" default="front_2d_lidar,back_2d_lidar" description="Enabled 2D lidars" />
+  <arg name="enable_3d_lidar" default="false" description="Enable 3D lidar" />
+  <arg name="type_negotiation_duration_s" default="5" description="Type negotiation duration in seconds" />
 
-  <include file="$(var isaac_ros_perceptor_bringup)/launch/drivers/nova_sensor_abstraction_layer.launch.py">
+  <include file="$(find-pkg-share isaac_ros_perceptor_bringup)/launch/drivers/nova_sensor_abstraction_layer.launch.py">
     <arg name="mode" value="real_world" />
     <arg name="rosbag" value="None" />
     <arg name="enabled_stereo_cameras" value="front_stereo_camera,left_stereo_camera,right_stereo_camera" />
@@ -22,49 +22,17 @@
 
 
   <!-- hesai -->
+  <arg name="sensor_model" default="PandarXT32"/>
+  <arg name="launch_hw" default="true" description="Whether to connect to a real sensor (true) or to accept packet messages (false).">
+    <choice value="true" />
+    <choice value="false" />
+  </arg>
+  <arg name="config_file" default="$(find-pkg-share nebula_ros)/config/lidar/hesai/$(var sensor_model).param.yaml"/>
 
-  <!-- Params -->
-  <!-- There is an issue where hw_monitor crashes due to data race,
-  so the monitor will now only be launched when explicitly specified with a launch command. -->
-  <arg name="launch_hw_monitor" default="false"/>
-
-  <arg name="model" default="PandarXT32"/>
-  <arg name="sensor_frame" default="pandar"/>
-  <arg name="return_mode" default="Strongest"/>
-  <arg name="sensor_ip" default="192.168.1.201"/>
-  <arg name="host_ip" default="255.255.255.255"/>
-  <arg name="data_port" default="2368"/>
-  <arg name="scan_phase" default="0.0"/>
-  <arg name="cloud_min_angle" default="0"/>
-  <arg name="cloud_max_angle" default="360"/>
-  <arg name="dual_return_distance_threshold" default="0.1"/>
-  <arg name="vehicle_mirror_param_file"/>
-  <arg name="container_name" default="hesai_node_container"/>
-
-  <include file="$(find-pkg-share common_sensor_launch)/launch/nebula_node_container.launch.py">
-    <arg name="launch_driver" value="true"/>
-    <arg name="launch_hw_monitor" value="$(var launch_hw_monitor)"/>
-    <arg name="sensor_model" value="$(var model)"/>
-    <arg name="return_mode" value="$(var return_mode)"/>
-    <arg name="frame_id" value="$(var sensor_frame)"/>
-    <arg name="sensor_ip" value="$(var sensor_ip)"/>
-    <arg name="host_ip" value="$(var host_ip)"/>
-    <arg name="data_port" value="$(var data_port)"/>
-    <arg name="scan_phase" value="$(var scan_phase)"/>
-    <arg name="cloud_min_angle" value="$(var cloud_min_angle)"/>
-    <arg name="cloud_max_angle" value="$(var cloud_max_angle)"/>
-    <arg name="max_range" value="$(var max_range)"/>
-    <arg name="dual_return_distance_threshold" value="$(var dual_return_distance_threshold)"/>
-    <arg name="vehicle_mirror_param_file" value="$(var vehicle_mirror_param_file)"/>
-    <arg name="use_intra_process" value="true"/>
-    <arg name="use_multithread" value="true"/>
-    <arg name="ptp_profile" value="automotive"/>
-    <arg name="ptp_switch_type" value="NON_TSN"/>
-    <arg name="ptp_transport_type" value="L2"/>
-    <arg name="setup_sensor" value="true"/>
-    <arg name="retry_hw" value="true"/>
-    <arg name="container_name" value="$(var container_name)"/>
-  </include>
+  <node pkg="nebula_ros" exec="hesai_ros_wrapper_node" name="hesai_ros_wrapper_node" output="screen">
+    <param from="$(var config_file)" allow_substs="true"/>
+    <param name="launch_hw" value="$(var launch_hw)"/>
+  </node>
 
 
 </launch>
