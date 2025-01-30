@@ -36,7 +36,7 @@ NovaCarterInterface::NovaCarterInterface(const rclcpp::NodeOptions & options)
     "odom", 10, std::bind(&NovaCarterInterface::odometry_callback, this, std::placeholders::_1));
 
   // Initialize publishers
-  twist_pub_ = this->create_publisher<TwistStampedMsg>("twist_cmd", 10);
+  twist_pub_ = this->create_publisher<TwistStampedMsg>("cmd_vel", 10);
   vehicle_twist_pub_ = this->create_publisher<VelocityReportMsg>("vehicle_twist_report", 10);
   steering_status_pub_ = this->create_publisher<SteeringReportMsg>("steering_status_report", 10);
 }
