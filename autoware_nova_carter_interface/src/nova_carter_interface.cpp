@@ -36,7 +36,7 @@ NovaCarterInterface::NovaCarterInterface(const rclcpp::NodeOptions & options)
     "odom", 10, std::bind(&NovaCarterInterface::odometry_callback, this, std::placeholders::_1));
 
   // Initialize publishers
-  twist_pub_ = this->create_publisher<TwistStampedMsg>("cmd_vel", 10);
+  twist_pub_ = this->create_publisher<TwistMsg>("cmd_vel", 10);
   vehicle_twist_pub_ = this->create_publisher<VelocityReportMsg>("vehicle_twist_report", 10);
   steering_status_pub_ = this->create_publisher<SteeringReportMsg>("steering_status_report", 10);
 }
@@ -89,12 +89,10 @@ void NovaCarterInterface::control_cmd_callback(const ControlMsg::ConstSharedPtr 
   const double raw_angular_velocity = linear_velocity / virtual_wheel_base_ * std::tan(control_msg->lateral.steering_tire_angle);
   const double angular_velocity = std::min(raw_angular_velocity, maximum_angular_velocity_);
 
-  // Publish twist command
-  auto twist_msg = TwistStampedMsg();
-  twist_msg.header.stamp = this->now();
-  twist_msg.header.frame_id = base_frame_id_;
-  twist_msg.twist.linear.x = linear_velocity;
-  twist_msg.twist.angular.z = angular_velocity;
+  // Publish twist command    
+  TwistMsg twist_msg = TwistMsg();
+  twist_msg.linear.x = linear_velocity;
+  twist_msg.angular.z = angular_velocity;
   twist_pub_->publish(twist_msg);
 }
 

@@ -23,7 +23,7 @@
 #include <autoware_vehicle_msgs/msg/velocity_report.hpp>
 
 // ROS messages for Nova Carter
-#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <geometry_msgs/msg/twist.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <string>
 
@@ -40,7 +40,7 @@ private:
   using ControlMsg = autoware_control_msgs::msg::Control;
   using OdometryMsg = nav_msgs::msg::Odometry;
   using SteeringReportMsg = autoware_vehicle_msgs::msg::SteeringReport;
-  using TwistStampedMsg = geometry_msgs::msg::TwistStamped;
+  using TwistMsg = geometry_msgs::msg::Twist;
   using VelocityReportMsg = autoware_vehicle_msgs::msg::VelocityReport;
 
 
@@ -51,7 +51,7 @@ private:
   rclcpp::Subscription<OdometryMsg>::SharedPtr odom_sub_;
 
   // Publishers To Nova Carter
-  rclcpp::Publisher<TwistStampedMsg>::SharedPtr twist_pub_;
+  rclcpp::Publisher<TwistMsg>::SharedPtr twist_pub_;
 
   // Publishers To Autoware
   rclcpp::Publisher<VelocityReportMsg>::SharedPtr vehicle_twist_pub_;
