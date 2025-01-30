@@ -3,3 +3,21 @@ repositories:
     type: git
     url: https://github.com/autowarefoundation/autoware_msgs.git
     version: 1.3.0
+  core/autoware_cmake:
+    type: git
+    url: https://github.com/autowarefoundation/autoware_cmake.git
+    version: 1.0.0
+  core/nebula:
+    type: git
+    url: https://github.com/tier4/nebula.git
+    version: v0.2.1
+  # Fork of transport_drivers that enables reduction of copy operations for nebula
+  core/transport_drivers:
+    type: git
+    url: https://github.com/autowarefoundation/transport_drivers
+    version: main
+  # for autoware_msgs
+  dependencies/geographic_msgs:
+    type: git
+    url: https://github.com/ros-geographic-info/geographic_info.git
+    version: ros2
