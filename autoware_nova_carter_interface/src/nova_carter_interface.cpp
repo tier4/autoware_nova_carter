@@ -28,6 +28,11 @@ NovaCarterInterface::NovaCarterInterface(const rclcpp::NodeOptions & options)
   // TODO(mitsudome-r): Get from vehicle info utils
   virtual_wheel_base_ = this->declare_parameter<double>("wheel_base");
 
+  // wheel base cannot be zero
+  if (std::abs(virtual_wheel_base_) < 1e-6) {
+    throw std::runtime_error("Wheel base is zero or too small");
+  }
+
   // Initialize subscribers
   control_cmd_sub_ = this->create_subscription<ControlMsg>(
     "control_cmd", 10, std::bind(&NovaCarterInterface::control_cmd_callback, this, std::placeholders::_1));
@@ -85,9 +90,19 @@ void NovaCarterInterface::control_cmd_callback(const ControlMsg::ConstSharedPtr 
   RCLCPP_DEBUG(this->get_logger(), "Received control command: velocity = %f, steering_angle = %f",
               control_msg->longitudinal.velocity, control_msg->lateral.steering_tire_angle);
 
-  const double linear_velocity = std::min(static_cast<double>(control_msg->longitudinal.velocity), maximum_linear_velocity_);
-  const double raw_angular_velocity = linear_velocity / virtual_wheel_base_ * std::tan(control_msg->lateral.steering_tire_angle);
-  const double angular_velocity = std::min(raw_angular_velocity, maximum_angular_velocity_);
+  // Clamp linear velocity within bounds
+  const double linear_velocity = std::clamp(
+    static_cast<double>(control_msg->longitudinal.velocity),
+    -maximum_linear_velocity_,
+    maximum_linear_velocity_);
+
+  // Calculate and clamp angular velocity
+  const double raw_angular_velocity = 
+    linear_velocity / virtual_wheel_base_ * std::tan(control_msg->lateral.steering_tire_angle);
+  const double angular_velocity = std::clamp(
+    raw_angular_velocity,
+    -maximum_angular_velocity_,
+    maximum_angular_velocity_);
 
   // Publish twist command    
   TwistMsg twist_msg = TwistMsg();
