@@ -21,3 +21,13 @@ repositories:
     type: git
     url: https://github.com/ros-geographic-info/geographic_info.git
     version: ros2
+  # Fork of nova_carter with modified tf
+  dependencies/nova_carter:
+    type: git
+    url: https://github.com/mitsudome-r/nova_carter.git
+    version: autoware-integ
+  # Temporary package to fix timestamp of pointcloud
+  dependencies/timestamp_overwrite:
+    type: git
+    url: https://github.com/mitsudome-r/timestamp_overwrite.git
+    version: main
