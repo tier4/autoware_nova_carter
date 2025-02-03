@@ -10,7 +10,7 @@ repositories:
   core/nebula:
     type: git
     url: https://github.com/tier4/nebula.git
-    version: v0.2.1
+    version: v0.2.2
   # Fork of transport_drivers that enables reduction of copy operations for nebula
   core/transport_drivers:
     type: git
