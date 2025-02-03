@@ -34,5 +34,10 @@
     <param name="launch_hw" value="$(var launch_hw)"/>
   </node>
 
+  <node pkg="timestamp_overwrite" exec="overwrite_pointcloud_timestamp" name="overwrite_pointcloud_timestamp" output="screen">
+    <remap from="~/input" to="pandar_points"/>
+    <remap from="~/output" to="/sensing/pointcloud_raw"/>
+  </node>
+
 
 </launch>
