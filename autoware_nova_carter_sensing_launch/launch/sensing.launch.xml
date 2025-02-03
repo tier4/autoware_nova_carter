@@ -32,6 +32,7 @@
   <node pkg="nebula_ros" exec="hesai_ros_wrapper_node" name="hesai_ros_wrapper_node" output="screen">
     <param from="$(var config_file)" allow_substs="true"/>
     <param name="launch_hw" value="$(var launch_hw)"/>
+    <param name="frame_id" value="front_3d_lidar"/>
   </node>
 
   <node pkg="timestamp_overwrite" exec="overwrite_pointcloud_timestamp" name="overwrite_pointcloud_timestamp" output="screen">
