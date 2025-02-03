@@ -42,7 +42,7 @@ NovaCarterInterface::NovaCarterInterface(const rclcpp::NodeOptions & options)
 
   // Initialize publishers
   twist_pub_ = this->create_publisher<TwistMsg>("cmd_vel", 10);
-  vehicle_twist_pub_ = this->create_publisher<VelocityReportMsg>("vehicle_twist_report", 10);
+  vehicle_velocity_pub_ = this->create_publisher<VelocityReportMsg>("vehicle_velocity_report", 10);
   steering_status_pub_ = this->create_publisher<SteeringReportMsg>("steering_status_report", 10);
 }
 
@@ -75,7 +75,7 @@ void NovaCarterInterface::odometry_callback(const OdometryMsg::ConstSharedPtr ms
   velocity_report_msg.header.frame_id = base_frame_id_;
   velocity_report_msg.longitudinal_velocity = linear_velocity;
   velocity_report_msg.heading_rate = angular_velocity;
-  vehicle_twist_pub_->publish(velocity_report_msg);
+  vehicle_velocity_pub_->publish(velocity_report_msg);
 }
 
 /**

@@ -54,7 +54,7 @@ private:
   rclcpp::Publisher<TwistMsg>::SharedPtr twist_pub_;
 
   // Publishers To Autoware
-  rclcpp::Publisher<VelocityReportMsg>::SharedPtr vehicle_twist_pub_;
+  rclcpp::Publisher<VelocityReportMsg>::SharedPtr vehicle_velocity_pub_;
   rclcpp::Publisher<SteeringReportMsg>::SharedPtr steering_status_pub_;
 
   // ROS Parameters
