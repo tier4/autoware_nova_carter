@@ -25,9 +25,10 @@ NovaCarterInterface::NovaCarterInterface(const rclcpp::NodeOptions & options)
   base_frame_id_ = this->declare_parameter<std::string>("base_frame_id");
   maximum_linear_velocity_ = this->declare_parameter<double>("maximum_linear_velocity");
   maximum_angular_velocity_ = this->declare_parameter<double>("maximum_angular_velocity");
+  const auto publish_frequency = this->declare_parameter<double>("publish_frequency");
+
   // TODO(mitsudome-r): Get from vehicle info utils
   virtual_wheel_base_ = this->declare_parameter<double>("wheel_base");
-
   // wheel base cannot be zero
   if (std::abs(virtual_wheel_base_) < 1e-6) {
     throw std::runtime_error("Wheel base is zero or too small");
@@ -36,14 +37,26 @@ NovaCarterInterface::NovaCarterInterface(const rclcpp::NodeOptions & options)
   // Initialize subscribers
   control_cmd_sub_ = this->create_subscription<ControlMsg>(
     "control_cmd", 10, std::bind(&NovaCarterInterface::control_cmd_callback, this, std::placeholders::_1));
-
   odom_sub_ = this->create_subscription<OdometryMsg>(
     "odom", 10, std::bind(&NovaCarterInterface::odometry_callback, this, std::placeholders::_1));
+
+  // Initialize services
+  control_mode_server_ = this->create_service<ControlModeCommand>(
+    "control_mode_request", std::bind(&NovaCarterInterface::control_mode_request_callback, this, std::placeholders::_1, std::placeholders::_2));
 
   // Initialize publishers
   twist_pub_ = this->create_publisher<TwistMsg>("cmd_vel", 10);
   vehicle_velocity_pub_ = this->create_publisher<VelocityReportMsg>("vehicle_velocity_report", 10);
   steering_status_pub_ = this->create_publisher<SteeringReportMsg>("steering_status_report", 10);
+  control_mode_pub_ = this->create_publisher<ControlModeReportMsg>("control_mode_report", 10);
+
+  // Initialize timers
+  const auto period_ns = rclcpp::Rate(publish_frequency).period();
+  timer_ = rclcpp::create_timer(
+    this, get_clock(), period_ns, std::bind(&NovaCarterInterface::publish_control_mode_report, this));
+
+  // Initialize control mode report
+  control_mode_report_.mode = ControlModeReportMsg::MANUAL;
 }
 
 /**
@@ -90,6 +103,17 @@ void NovaCarterInterface::control_cmd_callback(const ControlMsg::ConstSharedPtr 
   RCLCPP_DEBUG(this->get_logger(), "Received control command: velocity = %f, steering_angle = %f",
               control_msg->longitudinal.velocity, control_msg->lateral.steering_tire_angle);
 
+  // Initialize twist message
+  TwistMsg twist_msg = TwistMsg();
+
+  // If manual mode, publish 0 velocity command
+  if (control_mode_report_.mode == ControlModeReportMsg::MANUAL) {
+    twist_msg.linear.x = 0.0;
+    twist_msg.angular.z = 0.0;
+    twist_pub_->publish(twist_msg);
+    return;
+  }
+
   // Clamp linear velocity within bounds
   const double linear_velocity = std::clamp(
     static_cast<double>(control_msg->longitudinal.velocity),
@@ -105,10 +129,34 @@ void NovaCarterInterface::control_cmd_callback(const ControlMsg::ConstSharedPtr 
     maximum_angular_velocity_);
 
   // Publish twist command    
-  TwistMsg twist_msg = TwistMsg();
   twist_msg.linear.x = linear_velocity;
   twist_msg.angular.z = angular_velocity;
   twist_pub_->publish(twist_msg);
+}
+
+void NovaCarterInterface::control_mode_request_callback(
+  const ControlModeCommand::Request::SharedPtr request,
+  const ControlModeCommand::Response::SharedPtr response)
+{
+  switch (request->mode) {
+    case ControlModeCommand::Request::AUTONOMOUS:
+      control_mode_report_.mode = ControlModeReportMsg::AUTONOMOUS;
+      response->success = true;
+      break;
+    case ControlModeCommand::Request::MANUAL:
+      control_mode_report_.mode = ControlModeReportMsg::MANUAL;
+      response->success = true;
+      break;
+    default:
+      RCLCPP_ERROR(get_logger(), "Unsupported control mode: %d", request->mode);
+      response->success = false;
+  }
+}
+
+void NovaCarterInterface::publish_control_mode_report()
+{
+  control_mode_report_.stamp = this->now();
+  control_mode_pub_->publish(control_mode_report_);
 }
 
 }  // namespace autoware::nova_carter_interface

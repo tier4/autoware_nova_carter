@@ -19,8 +19,10 @@
 
 // Autoware messages
 #include <autoware_control_msgs/msg/control.hpp>
+#include <autoware_vehicle_msgs/msg/control_mode_report.hpp>
 #include <autoware_vehicle_msgs/msg/steering_report.hpp>
 #include <autoware_vehicle_msgs/msg/velocity_report.hpp>
+#include <autoware_vehicle_msgs/srv/control_mode_command.hpp>
 
 // ROS messages for Nova Carter
 #include <geometry_msgs/msg/twist.hpp>
@@ -38,6 +40,8 @@ public:
 private:
   // Type aliases for readability
   using ControlMsg = autoware_control_msgs::msg::Control;
+  using ControlModeCommand = autoware_vehicle_msgs::srv::ControlModeCommand;
+  using ControlModeReportMsg = autoware_vehicle_msgs::msg::ControlModeReport;
   using OdometryMsg = nav_msgs::msg::Odometry;
   using SteeringReportMsg = autoware_vehicle_msgs::msg::SteeringReport;
   using TwistMsg = geometry_msgs::msg::Twist;
@@ -56,7 +60,12 @@ private:
   // Publishers To Autoware
   rclcpp::Publisher<VelocityReportMsg>::SharedPtr vehicle_velocity_pub_;
   rclcpp::Publisher<SteeringReportMsg>::SharedPtr steering_status_pub_;
+  rclcpp::Publisher<ControlModeReportMsg>::SharedPtr control_mode_pub_;
 
+  // Other ROS Objects
+  rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::Service<ControlModeCommand>::SharedPtr control_mode_server_;
+  
   // ROS Parameters
   std::string base_frame_id_;
   double maximum_angular_velocity_;     // [rad/s]
@@ -64,13 +73,16 @@ private:
   double virtual_wheel_base_;           // [m]
 
   // Input Values
-  ControlMsg::ConstSharedPtr control_cmd_ptr_;
-  OdometryMsg::ConstSharedPtr odom_ptr_;
+  ControlModeReportMsg control_mode_report_;
 
   // Callbacks
   void control_cmd_callback(const ControlMsg::ConstSharedPtr msg);
   void odometry_callback(const OdometryMsg::ConstSharedPtr msg);
-
+  void control_mode_request_callback(
+    const ControlModeCommand::Request::SharedPtr request,
+    const ControlModeCommand::Response::SharedPtr response);
+  // Functions
+  void publish_control_mode_report();
 };
 
 }  // namespace autoware::nova_carter_interface
