@@ -56,7 +56,7 @@ NovaCarterInterface::NovaCarterInterface(const rclcpp::NodeOptions & options)
     this, get_clock(), period_ns, std::bind(&NovaCarterInterface::publish_control_mode_report, this));
 
   // Initialize control mode report
-  control_mode_report_.mode = ControlModeReportMsg::MANUAL;
+  control_mode_report_.mode = ControlModeReportMsg::AUTONOMOUS;
 }
 
 /**
