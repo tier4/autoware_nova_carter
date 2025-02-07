@@ -22,22 +22,17 @@
 
 
   <!-- hesai -->
-  <arg name="sensor_model" default="PandarXT32"/>
   <arg name="launch_hw" default="true" description="Whether to connect to a real sensor (true) or to accept packet messages (false).">
     <choice value="true" />
     <choice value="false" />
   </arg>
-  <arg name="config_file" default="$(find-pkg-share nebula_ros)/config/lidar/hesai/$(var sensor_model).param.yaml"/>
+  <arg name="config_file" default="$(find-pkg-share autoware_nova_carter_sensing_launch)/config/PandarXT32.param.yaml"/>
 
   <node pkg="nebula_ros" exec="hesai_ros_wrapper_node" name="hesai_ros_wrapper_node" output="screen">
     <param from="$(var config_file)" allow_substs="true"/>
     <param name="launch_hw" value="$(var launch_hw)"/>
     <param name="frame_id" value="front_3d_lidar"/>
-  </node>
-
-  <node pkg="timestamp_overwrite" exec="overwrite_pointcloud_timestamp" name="overwrite_pointcloud_timestamp" output="screen">
-    <remap from="~/input" to="pandar_points"/>
-    <remap from="~/output" to="/sensing/pointcloud_raw"/>
+    <remap from="pandar_points" to="/sensing/pointcloud_raw"/>
   </node>
 
 
