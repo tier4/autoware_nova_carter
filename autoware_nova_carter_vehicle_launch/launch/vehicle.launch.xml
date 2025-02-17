@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+  <arg name="initial_engage_state" default="false" description="/vehicle/engage state after starting Autoware"/>
+  <arg name="launch_vehicle_interface" default="true"/>
+
+  <!-- vehicle description -->
+  <include file="$(find-pkg-share nova_carter_description)/launch/nova_carter_description.launch.py"/>
+
+  <!-- vehicle interface -->
+  <group if="$(var launch_vehicle_interface)">
+    <node pkg="autoware_nova_carter_interface" exec="autoware_nova_carter_interface_node" name="nova_carter_interface" output="screen">
+      <param from="$(find-pkg-share autoware_nova_carter_interface)/config/nova_carter_interface.param.yaml" />
+      <remap from="odom" to="nova_carter/odom"/>
+      <remap from="vehicle_velocity_report" to="/vehicle/status/velocity_status"/>
+      <remap from="steering_status_report" to="/vehicle/status/steering_status"/>
+      <remap from="control_mode_report" to="/vehicle/status/control_mode"/>
+      <remap from="control_mode_request" to="/control/control_mode_request"/>
+      <remap from="control_cmd" to="/control/command/control_cmd"/>
+    </node>
+
+    <include file="$(find-pkg-share nova_carter_bringup)/launch/include/segway_include.launch.py">
+      <arg name="enable_wheel_odometry" value="false"/>
+      <arg name="namespace" value="nova_carter"/>
+    </include>
+
+    <node pkg="topic_tools" exec="relay" name="imu_topic_relay" output="log">
+        <param name="input_topic" value="/nova_carter/imu"/>
+        <param name="output_topic" value="/sensing/imu/imu_data"/>
+        <param name="type" value="sensor_msgs/msg/Imu"/>
+        <param name="reliability" value="best_effort"/>
+    </node>
+
+    <node pkg="tf2_ros" exec="static_transform_publisher" name="imu_tf" args="0 0 0 0 0 0 base_link segway_imu" output="log"/>
+
+    <include file="$(find-pkg-share isaac_ros_perceptor_bringup)/launch/algorithms/twist_mux.launch.py">
+    </include>
+
+  </group>
+</launch>

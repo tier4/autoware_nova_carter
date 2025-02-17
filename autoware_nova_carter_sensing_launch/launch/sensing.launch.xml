@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+  <!-- launch sensors from nova_carter_bringup except for hesai -->
+  <arg name="mode" default="real_world" description="Operating mode" />
+  <arg name="rosbag" default="None" description="Rosbag file" />
+  <arg name="enabled_stereo_cameras" default="front_stereo_camera,left_stereo_camera,right_stereo_camera" description="Enabled stereo cameras" />
+  <arg name="enabled_fisheye_cameras" default="front_fisheye_camera" description="Enabled fisheye cameras" />
+  <arg name="enabled_2d_lidars" default="front_2d_lidar,back_2d_lidar" description="Enabled 2D lidars" />
+  <arg name="enable_3d_lidar" default="false" description="Enable 3D lidar" />
+  <arg name="type_negotiation_duration_s" default="5" description="Type negotiation duration in seconds" />
+
+  <include file="$(find-pkg-share isaac_ros_perceptor_bringup)/launch/drivers/nova_sensor_abstraction_layer.launch.py">
+    <arg name="mode" value="real_world" />
+    <arg name="rosbag" value="None" />
+    <arg name="enabled_stereo_cameras" value="front_stereo_camera,left_stereo_camera,right_stereo_camera" />
+    <arg name="enabled_fisheye_cameras" value="front_fisheye_camera" />
+    <arg name="enabled_2d_lidars" value="front_2d_lidar,back_2d_lidar" />
+    <arg name="enable_3d_lidar" value="false" />
+    <arg name="type_negotiation_duration_s" value="5" />
+  </include>
+
+
+  <!-- hesai -->
+  <arg name="launch_hw" default="true" description="Whether to connect to a real sensor (true) or to accept packet messages (false).">
+    <choice value="true" />
+    <choice value="false" />
+  </arg>
+  <arg name="config_file" default="$(find-pkg-share autoware_nova_carter_sensing_launch)/config/PandarXT32.param.yaml"/>
+
+  <node pkg="nebula_ros" exec="hesai_ros_wrapper_node" name="hesai_ros_wrapper_node" output="screen">
+    <param from="$(var config_file)" allow_substs="true"/>
+    <param name="launch_hw" value="$(var launch_hw)"/>
+    <param name="frame_id" value="front_3d_lidar"/>
+    <remap from="pandar_points" to="/sensing/pointcloud_raw"/>
+  </node>
+
+
+</launch>

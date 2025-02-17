@@ -1,0 +1,16 @@
+repositories:
+  # LiDAR driver for Autoware
+  core/nebula:
+    type: git
+    url: https://github.com/tier4/nebula.git
+    version: v0.2.2
+  # Fork of transport_drivers that enables reduction of copy operations for nebula
+  core/transport_drivers:
+    type: git
+    url: https://github.com/autowarefoundation/transport_drivers
+    version: main
+  # Fork of nova_carter with modified tf
+  dependencies/nova_carter:
+    type: git
+    url: https://github.com/mitsudome-r/nova_carter.git
+    version: autoware-integ
