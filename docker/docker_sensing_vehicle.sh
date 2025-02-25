@@ -11,15 +11,3 @@ docker run --rm -it --privileged --name sensing_vehicle --net=host \
   --volume="/home/nvidia/autoware_data:/autoware_data" \
   autoware_nova_carter:latest /bin/bash
 
-  # nvcr.io/nvidia/isaac/nova_carter_bringup:release_3.2-aarch64 /bin/bash
-
-
-
-#  -e QT_X11_NO_MITSHM=1 \
-
-# Run in docker container
-# rosdep install -ry --from-paths src --ignore-src --rosdistro $ROS_DISTRO
-# colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --continue-on-error --packages-up-to autoware_nova_carter_interface autoware_nova_carter_sensing_launch autoware_nova_carter_vehicle_launch nova_carter_description
-
-# ros2 launch autoware_nova_carter_sensing_launch sensing.launch.xml
-# ros2 launch autoware_nova_carter_vehicle_launch vehicle.launch.xml
