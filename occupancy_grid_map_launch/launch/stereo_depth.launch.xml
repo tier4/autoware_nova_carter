@@ -1,0 +1,98 @@
+<launch>
+  <arg name="ess_model" default="ess" description="['ess', 'light_ess']"/>
+  <arg name="threshold" default="0.4"/>
+  <arg name="container_name" default="stereo_container"/>
+  <arg name="do_slam" default="True"/>
+
+  <let name="ess_engine_file_path" value="$(env ISAAC_ROS_WS)/isaac_ros_assets/models/dnn_stereo_disparity/dnn_stereo_disparity_v4.1.0_onnx/$(var ess_model).engine"/>
+  <let name="resize_width" value="960" if="$(eval '&quot;$(var ess_model)&quot;==&quot;ess&quot;')"/>
+  <let name="resize_height" value="576" if="$(eval '&quot;$(var ess_model)&quot;==&quot;ess&quot;')"/>
+  <let name="resize_width" value="480" if="$(eval '&quot;$(var ess_model)&quot;==&quot;light_ess&quot;')"/>
+  <let name="resize_height" value="288" if="$(eval '&quot;$(var ess_model)&quot;==&quot;light_ess&quot;')"/>
+
+  <!-- left rectify & resize -->
+  <group>
+    <push-ros-namespace namespace="left"/>
+    <load_composable_node target="$(var container_name)">
+      <!-- rectify -->
+      <composable_node pkg="isaac_ros_image_proc"
+                       plugin="nvidia::isaac_ros::image_proc::RectifyNode" name="rectify">
+        <param name="output_width" value="1920"/>
+        <param name="output_height" value="1200"/>
+      </composable_node>
+
+      <!-- resize -->
+      <composable_node pkg="isaac_ros_image_proc"
+                       plugin="nvidia::isaac_ros::image_proc::ResizeNode" name="resize">
+        <param name="output_width" value="$(var resize_width)"/>
+        <param name="output_height" value="$(var resize_height)"/>
+        <remap from="image" to="image_rect"/>
+        <remap from="camera_info" to="camera_info_rect"/>
+        <remap from="resize/image" to="image_resize"/>
+        <remap from="resize/camera_info" to="camera_info_resize"/>
+      </composable_node>
+    </load_composable_node >
+  </group>
+
+  <!-- right rectify & resize -->
+  <group>
+    <push-ros-namespace namespace="right" />
+
+    <load_composable_node target="$(var container_name)">
+      <!-- rectify -->
+      <composable_node pkg="isaac_ros_image_proc"
+                       plugin="nvidia::isaac_ros::image_proc::RectifyNode" name="rectify">
+        <param name="output_width" value="1920"/>
+        <param name="output_height" value="1200"/>
+      </composable_node>
+
+      <!-- resize -->
+      <composable_node pkg="isaac_ros_image_proc"
+                       plugin="nvidia::isaac_ros::image_proc::ResizeNode" name="resize">
+        <param name="output_width" value="$(var resize_width)"/>
+        <param name="output_height" value="$(var resize_height)"/>
+        <remap from="image" to="image_rect"/>
+        <remap from="camera_info" to="camera_info_rect"/>
+        <remap from="resize/image" to="image_resize"/>
+        <remap from="resize/camera_info" to="camera_info_resize"/>
+      </composable_node>
+    </load_composable_node >
+  </group>
+
+  <!-- disparity -->
+  <load_composable_node target="$(var container_name)">
+      <composable_node pkg="isaac_ros_ess"
+                       plugin="nvidia::isaac_ros::dnn_stereo_depth::ESSDisparityNode" name="disparity">
+        <remap from="left/image_rect" to="left/image_resize"/>
+        <remap from="right/image_rect" to="right/image_resize"/>
+        <remap from="left/camera_info" to="left/camera_info_resize"/>
+        <remap from="right/camera_info" to="right/camera_info_resize"/>
+        <remap from="camera_info" to="camera_info_disparity"/>
+        <param name="engine_file_path" value="$(var ess_engine_file_path)"/>
+        <param name="threshold" value="$(var threshold)"/>
+      </composable_node>
+  </load_composable_node >
+
+  <!-- disparity to depth -->
+  <load_composable_node target="$(var container_name)">
+      <composable_node pkg="isaac_ros_stereo_image_proc"
+                       plugin="nvidia::isaac_ros::stereo_image_proc::DisparityToDepthNode" name="disparity_to_depth">
+      </composable_node>
+  </load_composable_node >
+
+  <!-- visual slam -->
+  <group if="$(var do_slam)">
+    <load_composable_node target="$(var container_name)">
+      <composable_node pkg="isaac_ros_visual_slam"
+                       plugin="nvidia::isaac_ros::visual_slam::VisualSlamNode" name="visual_slam">
+        <param name="num_cameras" value="2"/>
+        <param name="rectified_images" value="true"/>
+        <remap from="visual_slam/image_0" to="left/image_rect"/>
+        <remap from="visual_slam/image_1" to="right/image_rect"/>
+        <remap from="visual_slam/camera_info_0" to="left/camera_info_rect"/>
+        <remap from="visual_slam/camera_info_1" to="right/camera_info_rect"/>
+      </composable_node>
+    </load_composable_node >
+  </group>
+
+</launch>

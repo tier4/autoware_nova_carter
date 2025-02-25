@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>occupancy_grid_map_launch</name>
+  <version>0.0.0</version>
+  <description>TODO: Package description</description>
+  <maintainer email="manato.hirabayashi@tier4.jp">manatohirabayashi</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake_auto</buildtool_depend>
+
+  <exec_depend>isaac_ros_h264_decoder</exec_depend>
+  <exec_depend>isaac_ros_image_proc</exec_depend>
+  <exec_depend>isaac_ros_ess</exec_depend>
+  <exec_depend>isaac_ros_stereo_image_proc</exec_depend>
+  <exec_depend>isaac_ros_visual_slam</exec_depend>
+  <exec_depend>isaac_ros_tensor_proc</exec_depend>
+  <exec_depend>isaac_ros_tensor_rt</exec_depend>
+  <exec_depend>isaac_ros_unet</exec_depend>
+  <exec_depend>nvblox_ros</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
