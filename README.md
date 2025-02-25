@@ -15,11 +15,20 @@ vcs import src < autoware_nova_carter/build_depends.repos
 docker build -t autoware_nova_carter -f ./docker/Dockerfile .
 ```
 
+## Build Autoware Launch
+
+```bash
+git clone https://github.com/mitsudome-r/autoware_launch -b feat/nova-carter-integ src/autoware_launch
+./docker_run_autoware.sh
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --continue-on-error --packages-select autoware_launch autoware_nova_carter_description
+```
+
 ## Run Docker Container
 
 TERMINAL 1
 ```bash
 ./docker_sensing_vehicle.sh
+source /autoware_nova_carter/install/setup.bash
 ros2 launch autoware_nova_carter_sensing_launch sensing.launch.xml
 ```
 
@@ -31,13 +40,17 @@ ros2 launch autoware_nova_carter_vehicle_launch vehicle.launch.xml
 
 TERMINAL 3
 ```
-git clone https://github.com/mitsudome-r/autoware_launch -b feat/nova-carter-integ src/autoware_launch
 ./docker_run_autoware.sh
-colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --continue-on-error --packages-select autoware_launch autoware_nova_carter_description
-source install/setup.bash
+source /autoware_nova_carter/install/setup.bash
 
 ros2 launch autoware_launch autoware.launch.xml map_path:=/autoware_map/shinagawa_2F vehicle_model:=autoware_nova_carter sensor_model:=sample_sensor_kit data_path:=/autoware_data
 ```
 
+HOST Machine
+(You need to build autoware first)
+```bash
+source $HOME/autoware/install/setup.bash
+rviz2 -d src/launcher/autoware_launch/autoware_launch/rviz/autoware.rviz
+```
 
 
