@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(occupancy_grid_map_launch)
+project(autoware_nova_carter_occupancy_grid_map_launch)
 
 # find dependencies
 find_package(ament_cmake_auto REQUIRED)
