@@ -9,15 +9,15 @@
   <group>
     <let name="namespace" value="front_stereo_camera"/>
     <push-ros-namespace namespace="$(var namespace)"/>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
       <arg name="container_name" value="$(var common_container_name)"/>
     </include>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
       <arg name="threshold" value="$(var ess/threshold)"/>
       <arg name="container_name" value="$(var common_container_name)"/>
       <arg name="do_slam" value="True"/>
     </include>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
       <arg name="container_name" value="$(var common_container_name)"/>
       <arg name="input_camera_namespace" value="/$(var namespace)/left"/>
     </include>
@@ -26,15 +26,15 @@
   <group>
     <let name="namespace" value="right_stereo_camera"/>
     <push-ros-namespace namespace="$(var namespace)"/>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
       <arg name="container_name" value="$(var common_container_name)"/>
     </include>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
       <arg name="threshold" value="$(var ess/threshold)"/>
       <arg name="container_name" value="$(var common_container_name)"/>
       <arg name="do_slam" value="False"/>
     </include>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
       <arg name="container_name" value="$(var common_container_name)"/>
       <arg name="input_camera_namespace" value="/$(var namespace)/left"/>
     </include>
@@ -43,15 +43,15 @@
   <group>
     <let name="namespace" value="left_stereo_camera"/>
     <push-ros-namespace namespace="$(var namespace)"/>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
       <arg name="container_name" value="$(var common_container_name)"/>
     </include>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
       <arg name="threshold" value="$(var ess/threshold)"/>
       <arg name="container_name" value="$(var common_container_name)"/>
       <arg name="do_slam" value="False"/>
     </include>
-    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
+    <include file="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
       <arg name="container_name" value="$(var common_container_name)"/>
       <arg name="input_camera_namespace" value="/$(var namespace)/left"/>
     </include>
@@ -60,8 +60,8 @@
 
 
   <!-- run nvblox to get occupancy grid -->
-  <let name="base_config" value="$(find-pkg-share occupancy_grid_map_launch)/config/nvblox/nvblox_base.yaml"/>
-  <let name="camera_config" value="$(find-pkg-share occupancy_grid_map_launch)/config/nvblox/specializations/nvblox_sim.yaml"/>
+  <let name="base_config" value="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/config/nvblox/nvblox_base.yaml"/>
+  <let name="camera_config" value="$(find-pkg-share autoware_nova_carter_occupancy_grid_map_launch)/config/nvblox/specializations/nvblox_sim.yaml"/>
   <load_composable_node target="$(var common_container_name)">
     <composable_node pkg="nvblox_ros"
                      plugin="nvblox::NvbloxNode" name="nvblox">
