@@ -31,12 +31,13 @@ ros2 launch autoware_nova_carter_vehicle_launch vehicle.launch.xml
 
 TERMINAL 3
 ```
+git clone https://github.com/mitsudome-r/autoware_launch -b feat/nova-carter-integ src/autoware_launch
 ./docker_run_autoware.sh
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --continue-on-error --packages-select autoware_launch autoware_nova_carter_description
+source install/setup.bash
+
 ros2 launch autoware_launch autoware.launch.xml map_path:=/autoware_map/shinagawa_2F vehicle_model:=autoware_nova_carter sensor_model:=sample_sensor_kit data_path:=/autoware_data
 ```
-
-
-
 
 
 
