@@ -1,0 +1,94 @@
+<launch>
+  <arg name="container_name" default="stereo_container"/>
+  <arg name="input_camera_namespace" default=""/>
+
+  <!-- People Segmentation -->
+  <group>
+    <push-ros-namespace namespace="unet"/>
+
+    <!-- Network parameter -->
+    <let name="network_input_width" value="960"/>
+    <let name="network_input_height" value="544"/>
+
+    <!-- TensorRTNode parameters -->
+    <let name="segment_onnx_file_path" value="$(env ISAAC_ROS_WS)/isaac_ros_assets/models/peoplesemsegnet/deployable_quantized_vanilla_unet_onnx_v2.0/model.onnx"/>
+    <let name="segment_engine_file_path" value="$(env ISAAC_ROS_WS)/isaac_ros_assets/models/peoplesemsegnet/deployable_quantized_vanilla_unet_onnx_v2.0/1/model.plan"/>
+    <let name="input_tensor_names" value="[input_tensor]"/>
+    <let name="input_binding_names" value="[input_1:0]"/>
+    <let name="input_tensor_formats" value="['nitros_tensor_list_nchw_bgr_f32']"/>
+    <let name="output_tensor_names" value="[output_tensor]"/>
+    <let name="output_binding_names" value="[argmax_1]"/>
+    <let name="output_tensor_formats" value="['nitros_tensor_list_nhwc_bgr_f32']"/>
+
+    <!-- UNetDecoderNode parameters -->
+    <let name="network_output_type" value="argmax"/>
+    <let name="color_segmentation_mask_encoding" value="bgr8"/>
+    <let name="mask_width" value="960"/>
+    <let name="mask_height" value="544"/>
+
+    <load_composable_node target="$(var container_name)">
+      <!-- resize to the network input -->
+      <composable_node pkg="isaac_ros_image_proc"
+                       plugin="nvidia::isaac_ros::image_proc::ResizeNode" name="unet_resize">
+        <param name="output_width" value="$(var network_input_width)"/>
+        <param name="output_height" value="$(var network_input_height)"/>
+        <remap from="image" to="$(var input_camera_namespace)/image_rect"/>
+        <remap from="camera_info" to="$(var input_camera_namespace)/camera_info_rect"/>
+        <remap from="resize/image" to="image_resize"/>
+        <remap from="resize/camera_info" to="camera_info_resize"/>
+      </composable_node>
+
+      <!-- convert image to tensor -->
+      <composable_node pkg="isaac_ros_tensor_proc"
+                       plugin="nvidia::isaac_ros::dnn_inference::ImageToTensorNode" name="image_to_tensor">
+        <param name="scale" value="True"/>
+        <param name="tensor_name" value="image"/>
+        <remap from="image" to="image_resize"/>
+        <remap from="tensor" to="image_tensor"/>
+      </composable_node>
+
+      <!-- normalize tensor -->
+      <composable_node pkg="isaac_ros_tensor_proc"
+                       plugin="nvidia::isaac_ros::dnn_inference::ImageTensorNormalizeNode" name="normalize">
+        <param name="mean" value="[0.5, 0.5, 0.5]"/>
+        <param name="stddev" value="[0.5, 0.5, 0.5]"/>
+        <param name="input_tensor_name" value="image"/>
+        <param name="output_tensor_name" value="input_tensor"/>
+        <remap from="tensor" to="image_tensor"/>
+      </composable_node>
+
+      <!-- inteleaved to planar -->
+      <composable_node pkg="isaac_ros_tensor_proc"
+                       plugin="nvidia::isaac_ros::dnn_inference::InterleavedToPlanarNode" name="interleaved_to_planner">
+        <param name="input_tensor_shape" value="[$(var network_input_height), $(var network_input_width), 3]"/>
+        <remap from="interleaved_tensor" to="normalized_tensor"/>
+        <remap from="planar_tensor" to="encoded_tensor"/>
+      </composable_node>
+
+      <!-- Inference -->
+      <composable_node pkg="isaac_ros_tensor_rt"
+                       plugin="nvidia::isaac_ros::dnn_inference::TensorRTNode" name="unet_inference">
+        <param name="model_file_path" value="$(var segment_onnx_file_path)"/>
+        <param name="engine_file_path" value="$(var segment_engine_file_path)"/>
+        <param name="force_engine_update" value="false"/>  <!-- this value is true by default and need to be false to use the pre-generated engine file -->
+        <param name="input_tensor_names" value="$(var input_tensor_names)"/>
+        <param name="input_binding_names" value="$(var input_binding_names)"/>
+        <param name="input_tensor_formats" value="$(var input_tensor_formats)"/>
+        <param name="output_tensor_names" value="$(var output_tensor_names)"/>
+        <param name="output_binding_names" value="$(var output_binding_names)"/>
+        <param name="output_tensor_formats" value="$(var output_tensor_formats)"/>
+        <remap from="tensor_pub" to="encoded_tensor"/>
+      </composable_node>
+
+      <composable_node pkg="isaac_ros_unet"
+                       plugin="nvidia::isaac_ros::unet::UNetDecoderNode" name="unet_decoder">
+        <param name="network_output_type" value="$(var network_output_type)"/>
+        <param name="color_segmentation_mask_encoding" value="$(var color_segmentation_mask_encoding)"/>
+        <param name="mask_width" value="$(var mask_width)"/>
+        <param name="mask_height" value="$(var mask_height)"/>
+        <param name="color_palette"
+               value="[0x556B2F, 0x800000, 0x008080, 0x000080, 0x9ACD32, 0xFF0000, 0xFF8C00, 0xFFD700, 0x00FF00, 0xBA55D3, 0x00FA9A, 0x00FFFF, 0x0000FF, 0xF08080, 0xFF00FF, 0x1E90FF, 0xDDA0DD, 0xFF1493, 0x87CEFA, 0xFFDEAD]"/>
+      </composable_node>
+    </load_composable_node>
+  </group>
+</launch>

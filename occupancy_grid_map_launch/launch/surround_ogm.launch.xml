@@ -1,0 +1,101 @@
+<launch>
+  <arg name="live_sensor" default="True"/>
+  <arg name="ess/threshold" default="0.4"/>
+
+  <let name="common_container_name" value="surround_container"/>
+  <!-- <node pkg="rclcpp_components" exec="component_container_mt" name="$(var common_container_name)" namespace="/"/> -->
+  <node pkg="rclcpp_components" exec="component_container_isolated" name="$(var common_container_name)" namespace="/"/>
+
+  <group>
+    <let name="namespace" value="front_stereo_camera"/>
+    <push-ros-namespace namespace="$(var namespace)"/>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
+      <arg name="container_name" value="$(var common_container_name)"/>
+    </include>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
+      <arg name="threshold" value="$(var ess/threshold)"/>
+      <arg name="container_name" value="$(var common_container_name)"/>
+      <arg name="do_slam" value="True"/>
+    </include>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
+      <arg name="container_name" value="$(var common_container_name)"/>
+      <arg name="input_camera_namespace" value="/$(var namespace)/left"/>
+    </include>
+  </group>
+
+  <group>
+    <let name="namespace" value="right_stereo_camera"/>
+    <push-ros-namespace namespace="$(var namespace)"/>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
+      <arg name="container_name" value="$(var common_container_name)"/>
+    </include>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
+      <arg name="threshold" value="$(var ess/threshold)"/>
+      <arg name="container_name" value="$(var common_container_name)"/>
+      <arg name="do_slam" value="False"/>
+    </include>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
+      <arg name="container_name" value="$(var common_container_name)"/>
+      <arg name="input_camera_namespace" value="/$(var namespace)/left"/>
+    </include>
+  </group>
+
+  <group>
+    <let name="namespace" value="left_stereo_camera"/>
+    <push-ros-namespace namespace="$(var namespace)"/>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/decompression.launch.xml" unless="$(var live_sensor)">
+      <arg name="container_name" value="$(var common_container_name)"/>
+    </include>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/stereo_depth.launch.xml">
+      <arg name="threshold" value="$(var ess/threshold)"/>
+      <arg name="container_name" value="$(var common_container_name)"/>
+      <arg name="do_slam" value="False"/>
+    </include>
+    <include file="$(find-pkg-share occupancy_grid_map_launch)/launch/people_semantic_segmentation.launch.xml">
+      <arg name="container_name" value="$(var common_container_name)"/>
+      <arg name="input_camera_namespace" value="/$(var namespace)/left"/>
+    </include>
+  </group>
+
+
+
+  <!-- run nvblox to get occupancy grid -->
+  <let name="base_config" value="$(find-pkg-share occupancy_grid_map_launch)/config/nvblox/nvblox_base.yaml"/>
+  <let name="camera_config" value="$(find-pkg-share occupancy_grid_map_launch)/config/nvblox/specializations/nvblox_sim.yaml"/>
+  <load_composable_node target="$(var common_container_name)">
+    <composable_node pkg="nvblox_ros"
+                     plugin="nvblox::NvbloxNode" name="nvblox">
+      <!-- load base parameters and overwrite the project specific ones -->
+      <param from="$(var base_config)"/>
+      <param from="$(var camera_config)"/>
+      <param name="num_cameras" value="3"/>
+      <param name="use_lidar" value="False"/>
+      <param name="use_segmentation" value="True"/>
+
+      <!-- camera0: front -->
+      <remap from="camera_0/depth/image" to="/front_stereo_camera/depth"/>
+      <remap from="camera_0/depth/camera_info" to="/front_stereo_camera/camera_info_disparity"/>n
+      <remap from="camera_0/color/image" to="/front_stereo_camera/left/image_raw"/>
+      <remap from="camera_0/color/camera_info" to="/front_stereo_camera/left/camera_info"/>
+      <remap from="camera_0/mask/image" to="/front_stereo_camera/unet/unet/raw_segmentation_mask"/>
+      <remap from="camera_0/mask/camera_info" to="/front_stereo_camera/unet/camera_info_resize"/>
+      <!-- camera1: left -->
+      <remap from="camera_1/depth/image" to="/left_stereo_camera/depth"/>
+      <remap from="camera_1/depth/camera_info" to="/left_stereo_camera/camera_info_disparity"/>
+      <remap from="camera_1/color/image" to="/left_stereo_camera/left/image_raw"/>
+      <remap from="camera_1/color/camera_info" to="/left_stereo_camera/left/camera_info"/>
+      <remap from="camera_1/mask/image" to="/left_stereo_camera/unet/unet/raw_segmentation_mask"/>
+      <remap from="camera_1/mask/camera_info" to="/left_stereo_camera/unet/camera_info_resize"/>
+      <!-- camera2: right -->
+      <remap from="camera_2/depth/image" to="/right_stereo_camera/depth"/>
+      <remap from="camera_2/depth/camera_info" to="/right_stereo_camera/camera_info_disparity"/>
+      <remap from="camera_2/color/image" to="/right_stereo_camera/left/image_raw"/>
+      <remap from="camera_2/color/camera_info" to="/right_stereo_camera/left/camera_info"/>
+      <remap from="camera_2/mask/image" to="/right_stereo_camera/unet/unet/raw_segmentation_mask"/>
+      <remap from="camera_2/mask/camera_info" to="/right_stereo_camera/unet/camera_info_resize"/>
+      <!-- other parameters -->
+      <remap from="pose" to="/front_stereo_camera/vo_pose"/>
+    </composable_node>
+  </load_composable_node >
+
+</launch>

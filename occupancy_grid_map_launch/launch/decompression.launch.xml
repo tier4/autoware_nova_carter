@@ -1,0 +1,19 @@
+<launch>
+  <arg name="container_name" default="stereo_container"/>
+
+  <load_composable_node target="$(var container_name)">
+     <composable_node pkg="isaac_ros_h264_decoder"
+                      plugin="nvidia::isaac_ros::h264_decoder::DecoderNode" name="left_decoder">
+       <remap from="image_compressed" to="left/image_compressed"/>
+       <remap from="image_uncompressed" to="left/image_raw"/>
+     </composable_node>
+   </load_composable_node>
+
+   <load_composable_node target="$(var container_name)">
+     <composable_node pkg="isaac_ros_h264_decoder"
+                      plugin="nvidia::isaac_ros::h264_decoder::DecoderNode" name="right_decoder">
+       <remap from="image_compressed" to="right/image_compressed"/>
+       <remap from="image_uncompressed" to="right/image_raw"/>
+     </composable_node>
+  </load_composable_node>
+</launch>
