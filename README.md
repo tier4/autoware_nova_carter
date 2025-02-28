@@ -29,13 +29,13 @@ TERMINAL 1
 ```bash
 ./docker_sensing_vehicle.sh
 source /autoware_nova_carter/install/setup.bash
-ros2 launch autoware_nova_carter_sensing_launch sensing.launch.xml
+ros2 launch autoware_nova_carter_sensing sensing.launch.xml
 ```
 
 TERMINAL 2
 ```bash
 docker exec -it vehicle_sensing /bin/bash
-ros2 launch autoware_nova_carter_vehicle_launch vehicle.launch.xml
+ros2 launch autoware_nova_carter_vehicle vehicle.launch.xml
 ```
 
 TERMINAL 3

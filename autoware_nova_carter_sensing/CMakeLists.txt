@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(autoware_nova_carter_sensing_launch)
+project(autoware_nova_carter_sensing)
 
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()

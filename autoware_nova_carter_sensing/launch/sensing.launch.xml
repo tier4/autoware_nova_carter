@@ -26,7 +26,7 @@
     <choice value="true" />
     <choice value="false" />
   </arg>
-  <arg name="config_file" default="$(find-pkg-share autoware_nova_carter_sensing_launch)/config/PandarXT32.param.yaml"/>
+  <arg name="config_file" default="$(find-pkg-share autoware_nova_carter_sensing)/config/PandarXT32.param.yaml"/>
 
   <node pkg="nebula_ros" exec="hesai_ros_wrapper_node" name="hesai_ros_wrapper_node" output="screen">
     <param from="$(var config_file)" allow_substs="true"/>
