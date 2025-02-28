@@ -12,5 +12,5 @@ repositories:
   # Fork of nova_carter with modified tf
   dependencies/nova_carter:
     type: git
-    url: https://github.com/mitsudome-r/nova_carter.git
-    version: autoware-integ
+    url: https://github.com/tier4/nova_carter.git
+    version: autoware-integration

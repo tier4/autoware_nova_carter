@@ -18,7 +18,7 @@ docker build -t autoware_nova_carter -f ./docker/Dockerfile .
 ## Build Autoware Launch
 
 ```bash
-git clone https://github.com/mitsudome-r/autoware_launch -b feat/nova-carter-integ src/autoware_launch
+git clone https://github.com/tier4/autoware_launch -b nova-carter-integration src/autoware_launch
 ./docker_run_autoware.sh
 colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --continue-on-error --packages-select autoware_launch autoware_nova_carter_description
 ```
