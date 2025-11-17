@@ -29,7 +29,7 @@ TERMINAL 1
 ```bash
 ./docker_sensing_vehicle.sh
 source /autoware_nova_carter/install/setup.bash
-ros2 launch autoware_nova_carter_sensing sensing.launch.xml
+ros2 launch autoware_nova_carter_sensing_launch sensing.launch.xml
 ```
 
 TERMINAL 2
@@ -43,7 +43,22 @@ TERMINAL 3
 ./docker_run_autoware.sh
 source /autoware_nova_carter/install/setup.bash
 
+source /opt/ros/humble/setup.bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y ros-humble-topic-tools ros-humble-xacro
+
+rosdep update
+rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --base-paths ./
+
 ros2 launch autoware_launch autoware.launch.xml map_path:=/autoware_map/shinagawa_2F vehicle_model:=autoware_nova_carter sensor_model:=sample_sensor_kit data_path:=/autoware_data
+
+###
+#  Then,
+#   - Edit vim /opt/autoware/share/autoware_core_localization/config/voxel_grid_downsample_filter.param.yaml
+#   - Fix: velodyne_top -> front_3d_lidar
+###
 ```
 
 HOST Machine
