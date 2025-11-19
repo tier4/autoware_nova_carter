@@ -10,9 +10,13 @@ git clone https://github.com/tier4/autoware_nova_carter.git
 vcs import src < autoware_nova_carter/build_depends.repos
 ```
 
-* Build Docker Image
+* Build Docker Images
 ```bash
-docker build -t autoware_nova_carter -f ./docker/Dockerfile .
+# For nova_carter
+$ docker build -t autoware_nova_carter -f ./docker/Dockerfile.nova_carter .
+
+# For autoware_core
+$ docker build -t autoware_core -f ./docker/Dockerfile.autoware_core .
 ```
 
 ## Build Autoware Launch
@@ -40,25 +44,20 @@ ros2 launch autoware_nova_carter_vehicle vehicle.launch.xml
 
 TERMINAL 3
 ```
-./docker_run_autoware.sh
-source /autoware_nova_carter/install/setup.bash
+$ ./docker_run_autoware.sh
 
-source /opt/ros/humble/setup.bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y ros-humble-topic-tools ros-humble-xacro
+(In docker)
 
-rosdep update
-rosdep install -y --from-paths src --ignore-src --rosdistro $ROS_DISTRO
-
-colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --base-paths ./
-
-ros2 launch autoware_launch autoware.launch.xml map_path:=/autoware_map/shinagawa_2F vehicle_model:=autoware_nova_carter sensor_model:=sample_sensor_kit data_path:=/autoware_data
-
-###
-#  Then,
-#   - Edit vim /opt/autoware/share/autoware_core_localization/config/voxel_grid_downsample_filter.param.yaml
-#   - Fix: velodyne_top -> front_3d_lidar
-###
+# source install/setup.bash
+# source /opt/autoware/setup.bash
+# ros2 launch \
+    autoware_core \
+    autoware_core.launch.xml \
+    map_path:=/autoware_map/shinagawa_2F \
+    vehicle_model:=autoware_nova_carter \
+    sensor_model:=sample_sensor_kit \
+    data_path:=/autoware_data \
+    launch_vehicle:=false
 ```
 
 HOST Machine
