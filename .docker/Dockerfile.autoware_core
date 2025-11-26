@@ -1,0 +1,28 @@
+FROM ghcr.io/autowarefoundation/autoware:core-devel
+
+WORKDIR /autoware
+
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt install -y ros-humble-topic-tools ros-humble-xacro
+
+# Prepare sample_sensor_kit_description
+#   - 3d6a435b96de637a98ac1f2715451e7db435f511: Wed Nov 12 15:21:10 2025 +0900
+RUN git clone https://github.com/autowarefoundation/autoware_launch.git /tmp/autoware_launch \
+    && pushd /tmp/autoware_launch \
+    && git checkout 3d6a435b96de637a98ac1f2715451e7db435f511 \
+    && cp -r sensor_kit/sample_sensor_kit_launch/sample_sensor_kit_description /autoware/sample_sensor_kit_description \
+    && popd \
+    && rm -rf /tmp/autoware_launch
+
+COPY autoware_nova_carter_description /autoware/autoware_nova_carter_description
+
+RUN source /opt/ros/humble/setup.bash \
+    && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --base-paths /autoware
+
+ADD files.patch/voxel_grid_downsample_filter.normal.patch voxel_grid_downsample_filter.normal.patch
+RUN patch /opt/autoware/share/autoware_core_localization/config/voxel_grid_downsample_filter.param.yaml < voxel_grid_downsample_filter.normal.patch
+
+COPY .docker/ros_entrypoint.sh /ros_entrypoint.sh
+ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD ["/bin/bash"]

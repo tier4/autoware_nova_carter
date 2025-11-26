@@ -10,6 +10,17 @@ COPY autoware_nova_carter_vehicle /autoware_nova_carter/src/autoware_nova_carter
 WORKDIR /autoware_nova_carter
 RUN vcs import src < build_depends.repos
 
+# Remove deprecated keys
+RUN rm /etc/apt/sources.list.d/ros2.list
+RUN rm /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Now add the ROS 2 apt repository to your system. First authorize our GPG key with apt.
+RUN apt update --allow-releaseinfo-change && sudo apt install -y curl gnupg lsb-release
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
+
+# Then add the repository to your sources list.
+RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(source /etc/os-release && echo $UBUNTU_CODENAME) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
 RUN source /opt/ros/humble/setup.bash \
     && apt-get update \
     && rosdep update \

@@ -32,7 +32,7 @@
     <param from="$(var config_file)" allow_substs="true"/>
     <param name="launch_hw" value="$(var launch_hw)"/>
     <param name="frame_id" value="front_3d_lidar"/>
-    <remap from="pandar_points" to="/sensing/pointcloud_raw"/>
+    <remap from="pandar_points" to="/sensing/lidar/top/pointcloud_raw"/>
   </node>
 
 
